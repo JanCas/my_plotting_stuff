@@ -55,7 +55,7 @@ if uploaded_file is not None:
                 reshaped = temp.pivot(index=options[0], columns=value_filter, values=options[1])
                 reshaped.reset_index(inplace=True)
 
-                reshaped.columns = ['Time'] + [f'Uptake_v_{col}' for col in reshaped.columns[1:]]
+                reshaped.columns = ['Time'] + [f'{options[1]}_v_{col}' for col in reshaped.columns[1:]]
 
                 st.write(reshaped)
                 print(reshaped.columns[1:])
