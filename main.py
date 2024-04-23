@@ -20,6 +20,23 @@ if uploaded_file is not None:
                 df.columns,
                 )
 
+        options_to_freeze = st.multiselect(
+                'columns to plot',
+                set(list(df.columns)).difference(set(options)),
+                )
+
+        filter_v = {}
+        for option in options_to_freeze:
+                filter_v[option] = st.select_slider(
+                        option,
+                        options=df[option].unique())
+
+        temp = df.loc[(df[list(filter_v)] == pd.Series(filter_v)).all(axis=1)]
+
+        st.write(temp)
+
+        print(filter_v)
+
         plot_options = st.selectbox(
                 'plotting options',
                 ["2D", "3D"],
@@ -31,7 +48,7 @@ if uploaded_file is not None:
                 st.plotly_chart(fig, use_container_width=True)
 
         if plot_options == "3D":
-                x,y,z = surface_plot_data(df, options[0], options[1], options[2])
+                x,y,z = surface_plot_data(temp, options[0], options[1], options[2])
 
                 fig = go.Figure(data=[go.Surface(z=z, x=x, y=y)])
                 fig.update_layout(title=f'{options[0]} vs {options[1]} and {options[2]}', autosize=True,
