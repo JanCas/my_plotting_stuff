@@ -64,6 +64,17 @@ if uploaded_file is not None:
 
                 st.plotly_chart(fig, use_container_width=True)
 
+                buffer = io.StringIO()
+                fig.write_html(buffer, include_plotlyjs='cdn')
+                html_bytes = buffer.getvalue().encode()
+
+                st.download_button(
+                        label='Download HTML',
+                        data=html_bytes,
+                        file_name='stuff.html',
+                        mime='text/html'
+                )
+
     if plot_options == "3D":
         x, y, z = surface_plot_data(temp, options[0], options[1], options[2])
 
