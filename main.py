@@ -2,11 +2,15 @@ import io
 
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from utils.plotly.data_manipulation import surface_plot_data
 
-delimiter = st.text_input('Delimiter', '\s')
+#pio.templates.default = "plotly"
+
+delimiter = st.text_input('Delimiter', '\s+')
 
 uploaded_file = st.file_uploader("Choose a file")
 
@@ -29,7 +33,7 @@ if uploaded_file is not None:
     for option in options_to_freeze:
         filter_v[option] = st.select_slider(
             option,
-            options=df[option].unique())
+            options=np.sort(df[option].unique()))
 
     temp = df.loc[(df[list(filter_v)] == pd.Series(filter_v)).all(axis=1)]
 
@@ -57,10 +61,16 @@ if uploaded_file is not None:
 
                 reshaped.columns = ['Time'] + [f'{options[1]}_v_{col}' for col in reshaped.columns[1:]]
 
+                cumu = st.toggle("cummulative")
+
+                if cumu:
+                    reshaped.iloc[:, 1:] = reshaped.iloc[:, 1:].cumsum(axis=0)
+
                 st.write(reshaped)
                 print(reshaped.columns[1:])
 
                 fig = px.line(reshaped, x=reshaped.columns[0], y=reshaped.columns[1:])
+                fig.update_layout(title=f"{options[0]} vs {options[1]}", xaxis_title=options[0], yaxis_title=options[1])
 
                 st.plotly_chart(fig, use_container_width=True)
 
@@ -76,6 +86,11 @@ if uploaded_file is not None:
                 )
 
     if plot_options == "3D":
+        cumu = st.toggle("cummulative")
+
+        if cumu:
+            temp[options[2]] = temp[options[2]].cumsum(axis=0)
+
         x, y, z = surface_plot_data(temp, options[0], options[1], options[2])
 
         fig = go.Figure(data=[go.Surface(z=z, x=x, y=y)])
