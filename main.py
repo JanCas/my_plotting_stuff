@@ -19,6 +19,15 @@ if uploaded_file is not None:
 
     st.write(df)
 
+    timestamp_column = st.multiselect(
+         "Select timestamp column",
+        df.columns,
+    )
+
+    if timestamp_column:
+         for col in timestamp_column:
+             df[col] = pd.to_datetime(df[col], unit='s')
+
     options = st.multiselect(
         'columns to plot',
         df.columns,
@@ -62,6 +71,11 @@ if uploaded_file is not None:
                 reshaped.columns = ['Time'] + [f'{options[1]}_v_{col}' for col in reshaped.columns[1:]]
 
                 cumu = st.toggle("cummulative")
+
+                resample_interval = st.text_input('Resample interval', '30s')
+
+                if resample_interval:
+                     reshaped = reshaped.resample(resample_interval, on='Time').mean().reset_index()
 
                 if cumu:
                     reshaped.iloc[:, 1:] = reshaped.iloc[:, 1:].cumsum(axis=0)
